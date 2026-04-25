@@ -3,7 +3,7 @@
  * A custom Lovelace card for Home Assistant
  * Displays waste collection dates as glass-style chips
  *
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 /* ============================================================
@@ -183,7 +183,6 @@ class UltimateWasteCardEditor extends HTMLElement {
     addType.addEventListener("change", () => {
       const type = addType.value;
       if (type) {
-        // Suggest entity name
         addEntity.value = `sensor.mijnafvalwijzer_${type}`;
       }
     });
@@ -413,6 +412,7 @@ class UltimateWasteCard extends HTMLElement {
         flex-direction: column;
         align-items: center;
         min-width: 0;
+        width: 100%;
       }
       .cn {
         font-size: 12px;
@@ -425,17 +425,44 @@ class UltimateWasteCard extends HTMLElement {
         font-family: var(--primary-font-family, sans-serif);
       }
       .cd {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        width: 100%;
+      }
+      .cd-day {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.45);
+        white-space: nowrap;
+        font-family: var(--primary-font-family, sans-serif);
+        line-height: 1.2;
+      }
+      .cd-date {
+        font-size: 11px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.45);
+        white-space: nowrap;
+        font-family: var(--primary-font-family, sans-serif);
+        line-height: 1.2;
+      }
+      .cd-single {
         font-size: 11px;
         font-weight: 600;
         color: rgba(255,255,255,0.45);
         white-space: nowrap;
         font-family: var(--primary-font-family, sans-serif);
       }
-      .cd-today {
+      .cd-today .cd-single,
+      .cd-today .cd-day,
+      .cd-today .cd-date {
         color: #026FA1;
         font-weight: 800;
       }
-      .cd-tomorrow {
+      .cd-tomorrow .cd-single,
+      .cd-tomorrow .cd-day,
+      .cd-tomorrow .cd-date {
         color: #FF9800;
         font-weight: 800;
       }
@@ -467,17 +494,21 @@ class UltimateWasteCard extends HTMLElement {
       dateEl.classList.remove("cd-today", "cd-tomorrow");
 
       if (!datum || datum === "unknown" || datum === "unavailable") {
-        dateEl.textContent = "Onbekend";
+        dateEl.innerHTML = `<span class="cd-single">Onbekend</span>`;
       } else if (datum === today) {
-        dateEl.textContent = "Vandaag";
+        dateEl.innerHTML = `<span class="cd-single">Vandaag</span>`;
         dateEl.classList.add("cd-today");
         chipEl.classList.add("chip-today");
       } else if (datum === tomorrow) {
-        dateEl.textContent = "Morgen";
+        dateEl.innerHTML = `<span class="cd-single">Morgen</span>`;
         dateEl.classList.add("cd-tomorrow");
         chipEl.classList.add("chip-tomorrow");
+      } else if (datum.includes(", ")) {
+        // Split "Donderdag, 30-04-2026" into day name and date
+        const [dayName, dateStr] = datum.split(", ");
+        dateEl.innerHTML = `<span class="cd-day">${dayName}</span><span class="cd-date">${dateStr}</span>`;
       } else {
-        dateEl.textContent = datum;
+        dateEl.innerHTML = `<span class="cd-single">${datum}</span>`;
       }
     });
   }
@@ -506,7 +537,7 @@ window.customCards.push({
 });
 
 console.info(
-  "%c ULTIMATE-WASTE-CARD %c v1.0.0 ",
+  "%c ULTIMATE-WASTE-CARD %c v1.0.1 ",
   "color:#fff;background:#4CAF50;font-weight:bold;padding:2px 6px;border-radius:4px 0 0 4px;",
   "color:#4CAF50;background:#f0f0f0;font-weight:bold;padding:2px 6px;border-radius:0 4px 4px 0;"
 );
